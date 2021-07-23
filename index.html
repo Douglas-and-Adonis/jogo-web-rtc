@@ -1,0 +1,28 @@
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <title>Jogo WebRTC</title>
+  </head>
+
+  <body>
+    <!-- SCRIPT GOES HERE -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!--<script src="/client.js"></script>-->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io.connect('/');
+        socket.emit('JOIN', { message: '' });
+        
+        socket.on('ROOM_JOINED', function(data){
+            console.log("Jogador %s registrado com sucesso!", socket.id);
+            console.log(data);
+        });
+        //função que é disparada quando é pressionado o botão
+	    function enviarMsg(){
+		socket.emit("mensagem", $("#inputMsg").val()); //enviamos o valor do input
+		$("#inputMsg").val(''); //depois deixamos ele vazio
+	    }
+
+    </script>
+  </body>
+</html>

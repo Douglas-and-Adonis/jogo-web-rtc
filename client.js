@@ -1,15 +1,13 @@
-const io = require('socket.io')
-const socket = io.connect("http://localhost:8000/");
 //Agora vamos usar o socket de uma maneira muito semelhante à forma como ele foi usado no back-end:
+const io = require('socket.io')
+const socket = io()
 
 socket.on("connect", function() {
-    // Do stuff when we connect to the server
+    // Do stuff when we connect to the serve
+    socket.emit('JOIN', { message: '' })
 });
 
-socket.on("some event", function(data) {
-    // Log the data I received
+socket.on('ROOM_JOINED', function(data){
+    console.log("Jogador %s registrado com sucesso!", socket.id);
     console.log(data);
-
-    // Send a message to the server
-    socket.emit("other event", {some: "data"});
 });
