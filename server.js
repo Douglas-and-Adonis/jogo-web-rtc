@@ -6,10 +6,10 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
 // cria uma rota para o arquivo index.html
-app.use(express.static(path.join(__dirname, 'public')));
-/*app.get('/', function(req, res){
+//app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
-});*/
+});
 
 // Lista de clientes
 var players = [];
