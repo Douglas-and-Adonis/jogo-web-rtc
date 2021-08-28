@@ -292,5 +292,5 @@ async function prepareRoom(socket, data){
   // --- default room ---
 let defaultRoom = null
 
-const port = 3000
+const port = 3666
 server.listen(port)
