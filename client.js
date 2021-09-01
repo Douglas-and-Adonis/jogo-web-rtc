@@ -22,6 +22,8 @@ let localConnection = null;   // RTCPeerConnection for our "local" connection
 let remoteConnection = null;  // RTCPeerConnection for the "remote"
 var midia;
 
+var info = 0
+
 const peerConnections = {};
 
 const iceServers = {
@@ -157,9 +159,19 @@ socket.on("DISCONNECT", id => {
   console.log(peerConnections[id]);
 });
 
+socket.on("INFO", info => {
+  this.info = info
+  sendSome
+})
+
 window.onunload = window.onbeforeunload = () => {
   socket.close();
 };
+
+setInterval(sendSome, 200);
+function sendSome() {
+  socket.emit("INFO", info)
+}
 
 function joinRoom(user) {
     if (user === '') {
