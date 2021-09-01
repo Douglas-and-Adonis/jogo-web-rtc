@@ -1,6 +1,6 @@
 
 const socket = io.connect("/", {path: "/douglas.as1997/socket.io"});
-const audio = document.querySelector("video");
+// const audio = document.querySelector("video");
 
 let roomId = 1
 let name
@@ -17,8 +17,12 @@ var userInput = document.getElementById("user-input");
 
 connectButton.addEventListener('click', () => { joinRoom(userInput.value) })
 
-const peerConnections = {};
+
+let localConnection = null;   // RTCPeerConnection for our "local" connection
+let remoteConnection = null;  // RTCPeerConnection for the "remote"
 var midia;
+
+const peerConnections = {};
 
 const iceServers = {
   iceServers: [
@@ -48,6 +52,13 @@ socket.on('ROOM_CREATED', (detailsReceived, playersReceived) => {
 
   loginDetails.isRoomCreator = true
   loginDetails.numberOfClients = playersReceived.lenght
+
+  navigator.mediaDevices
+    .getUserMedia({ video: false, audio: true })
+    .then((stream) => {
+      midia = stream;
+  })
+  .catch((error) => console.log(error));
 })
 
 socket.on('ROOM_JOINED',  (detailsReceived, playersReceived) => {
@@ -64,72 +75,75 @@ socket.on('ROOM_JOINED',  (detailsReceived, playersReceived) => {
   loginDetails.isRoomCreator = false
   loginDetails.numberOfClients = playersReceived.lenght
 
-
   navigator.mediaDevices
     .getUserMedia({ video: false, audio: true })
     .then((stream) => {
       midia = stream;
-      const peerConnection = new RTCPeerConnection(iceServers);
-      peerConnections[playersReceived[0]] = peerConnection;
+      localConnection = new RTCPeerConnection(iceServers);
+      // const peerConnection = new RTCPeerConnection(iceServers);
+      // peerConnections[playersReceived[0]] = peerConnection;
 
-      stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-      peerConnection.onicecandidate = event => {
-        if (event.candidate) {
-          console.log("SENDING ICE_CANDIDATE")
-          socket.emit("ICE_CANDIDATE", playersReceived[0], event.candidate)
-        }
+      midia.getTracks().forEach(track => localConnection.addTrack(track, midia));
+      localConnection.onicecandidate = ({ candidate }) => {
+          candidate && socket.emit("ICE_CANDIDATE", playersReceived[0], candidate)
       };
 
-      peerConnection.ontrack = ({ streams: [midia] }) => {
+      localConnection.ontrack = ({ streams: [midia] }) => {
         audio.srcObject = midia;
       };
 
-      peerConnection
+      localConnection
       .createOffer()
-      .then(sdp => peerConnection.setLocalDescription(sdp))
+      .then((sdp) => localConnection.setLocalDescription(sdp))
       .then(() => {
         console.log("SENDING OFFER")
-        socket.emit("OFFER", playersReceived[0], peerConnection.localDescription);
+        socket.emit("OFFER", playersReceived[0], localConnection.localDescription);
       });
     });
 });
 
 socket.on("OFFER", (id, description) => {
-  peerConnection = new RTCPeerConnection(iceServers);
+  // peerConnection = new RTCPeerConnection(iceServers);
+  remoteConnection = new RTCPeerConnection(iceServers);
 
   midia
     .getTracks()
-    .forEach((track) => peerConnection.addTrack(track, midia));
+    .forEach((track) => remoteConnection.addTrack(track, midia));
 
-  peerConnection
+  remoteConnection.onicecandidate = ({ candidate })=> {
+    if (candidate) {
+      console.log("SENDING ICE_CANDIDATE")
+      socket.emit("ICE_CANDIDATE", id, candidate);
+    }
+  };
+
+  remoteConnection
     .setRemoteDescription(description)
-    .then(() => peerConnection.createAnswer())
-    .then(sdp => peerConnection.setLocalDescription(sdp))
+    .then(() => remoteConnection.createAnswer())
+    .then(sdp => remoteConnection.setLocalDescription(sdp))
     .then(() => {
       console.log("SENDING ANSWER")
-      socket.emit("ANSWER", id, peerConnection.localDescription);
+      socket.emit("ANSWER", id, remoteConnection.localDescription);
     });
-  peerConnection.ontrack = ({ streams: [midia] }) => {
+
+  remoteConnection.ontrack = ({ streams: [midia] }) => {
     audio.srcObject = midia;
-  };
-  peerConnection.onicecandidate = event => {
-    if (event.candidate) {
-      console.log("SENDING ICE_CANDIDATE")
-      socket.emit("ICE_CANDIDATE", id, event.candidate);
-    }
   };
 });
 
 socket.on("ANSWER", (id, description) => {
   console.log("RECEIVED ANSWER")
-  peerConnections[id].setRemoteDescription(description);
+  // peerConnections[id].setRemoteDescription(description);
+  localConnection.setRemoteDescription(description);
   console.log(peerConnections[id]);
 });
 
 socket.on("ICE_CANDIDATE", (id, candidate) => {
   console.log("RECEIVED ICE_CANDIDATE")
-  peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
-  console.log(peerConnections[id]);
+  const connection = localConnection || remoteConnection;
+  connection.addIceCandidate(new RTCIceCandidate(candidate));
+  //peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
+  //console.log(peerConnections[id]);
 });
 
 socket.on("DISCONNECT", id => {
