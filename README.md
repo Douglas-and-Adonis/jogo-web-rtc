@@ -6,4 +6,6 @@ Jogo Web RTC
 - npm install
 - npm start
 
-O jogo estára disponivel em localhost:3000
+O jogo está disponivel em https://smu20211.sj.ifsc.edu.br/douglas.as1997
+- aceitando apenas 2 usuarios simultaneamente
+- trocas de audio funcionais
