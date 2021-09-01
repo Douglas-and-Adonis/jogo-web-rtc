@@ -58,8 +58,8 @@ io.sockets.on('connection', function(socket) {
       socket.to(socketId).emit("ANSWER", socket.id, description);
     });
 
-    socket.on("ICE_CANDIDATE", (socketId, candidate) => {
-      socket.to(socketId).emit('ICE_CANDIDATE', candidate)
+    socket.on("ICE_CANDIDATE", (socketId, event) => {
+      socket.to(socketId).emit('ICE_CANDIDATE', event)
     })
 
     // Fazer ambos os lados trocarem informações

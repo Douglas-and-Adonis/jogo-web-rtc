@@ -89,9 +89,11 @@ socket.on('ROOM_JOINED',  (detailsReceived, playersReceived) => {
       localConnection = new RTCPeerConnection(iceServers);
 
       midia.getTracks().forEach((track) => localConnection.addTrack(track, midia));
-      localConnection.onicecandidate = ({ candidate }) => {
+
+      localConnection.onicecandidate = sendIceCandidate
+      /*localConnection.onicecandidate = ({ candidate }) => {
           candidate && socket.emit("ICE_CANDIDATE", playersReceived[0], candidate)
-      };
+      };*/
 
       localConnection.ontrack = ({ streams: [midia] }) => {
         audio.srcObject = midia;
@@ -115,12 +117,18 @@ socket.on("OFFER", (id, description) => {
     .getTracks()
     .forEach((track) => remoteConnection.addTrack(track, midia));
 
-  remoteConnection.onicecandidate = ({ candidate })=> {
+    remoteConnection.ontrack = ({ streams: [midia] }) => {
+      audio.srcObject = midia;
+    };
+
+  remoteConnection.onicecandidate = sendIceCandidate
+
+  /*remoteConnection.onicecandidate = ({ candidate })=> {
     if (candidate) {
       console.log("SENDING ICE_CANDIDATE")
       socket.emit("ICE_CANDIDATE", id, candidate);
     }
-  };
+  };*/
 
   remoteConnection
     .setRemoteDescription(description)
@@ -130,10 +138,6 @@ socket.on("OFFER", (id, description) => {
       console.log("SENDING ANSWER")
       socket.emit("ANSWER", id, remoteConnection.localDescription);
     });
-
-  remoteConnection.ontrack = ({ streams: [midia] }) => {
-    audio.srcObject = midia;
-  };
 });
 
 socket.on("ANSWER", (id, description) => {
@@ -143,10 +147,16 @@ socket.on("ANSWER", (id, description) => {
   console.log(peerConnections[id]);
 });
 
-socket.on("ICE_CANDIDATE", (id, candidate) => {
+socket.on("ICE_CANDIDATE", (id, event) => {
   console.log(`RECEIVED ICE_CANDIDATE ${candidate}`)
   const connection = localConnection || remoteConnection;
   console.log(`conection -> ${connection}`)
+
+  var candidate = new RTCIceCandidate({
+    sdpMLineIndex: event.label,
+    candidate: event.candidate,
+  })
+
   connection.addIceCandidate(new RTCIceCandidate(candidate));
 });
 
@@ -179,5 +189,14 @@ function joinRoom(user) {
 
       console.log('Enviou JOIN com socket id: ', socket.id)
       socket.emit('JOIN', loginDetails)
+    }
+  }
+
+  function sendIceCandidate(event) {
+    if (event.candidate) {
+      socket.emit("ICE_CANDIDATE", {
+        label: event.candidate.sdpMLineIndex,
+        candidate: event.candidate.candidate,
+      })
     }
   }
