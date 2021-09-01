@@ -144,12 +144,10 @@ socket.on("ANSWER", (id, description) => {
 });
 
 socket.on("ICE_CANDIDATE", (id, candidate) => {
-  console.log("RECEIVED ICE_CANDIDATE")
+  console.log(`RECEIVED ICE_CANDIDATE ${candidate}`)
   const connection = localConnection || remoteConnection;
   console.log(`conection -> ${connection}`)
-  connection.addIceCandidate(new RTCIceCandidate(candidate, "teste" , 12345 ));
-  //peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
-  //console.log(peerConnections[id]);
+  connection.addIceCandidate(new RTCIceCandidate(candidate));
 });
 
 socket.on("DISCONNECT", id => {
