@@ -1,4 +1,5 @@
-const socket = io()
+
+const socket = io.connect("/", {path: "/douglas.as1997/socket.io"});
 const audio = document.querySelector("video");
 
 let roomId = 1
@@ -11,6 +12,9 @@ let loginDetails = {roomId, name, isCreator, idSocket, numberOfClients}
 
 alert('Informe o nome do usuario');
 
+var connectButton = document.getElementById("connect-button");
+var userInput = document.getElementById("user-input");
+
 connectButton.addEventListener('click', () => { joinRoom(userInput.value) })
 
 const peerConnections = {};
@@ -18,12 +22,7 @@ var midia;
 
 const iceServers = {
   iceServers: [
-  { urls: "stun:smu20211.sj.ifsc.edu.br" },
-      {
-        urls: "turn:smu20211.sj.ifsc.edu.br",
-        username: "douglas.as1997",
-        credential: "smu20211"
-      }
+  { urls: "stun:stun.l.google.com:19302" }
   ],
 }
 
@@ -56,7 +55,7 @@ socket.on('ROOM_JOINED',  (detailsReceived, playersReceived) => {
   console.log("Conectado ao Servidor, nosso ID é %s", socket.id);
   console.log(`Connection Details received from Server: ${detailsReceived}`);
   console.log(`Actual players on room received from Server: ${playersReceived}`);
-  
+
   loginDetails = detailsReceived
 
   userInput.disabled = true
@@ -65,7 +64,7 @@ socket.on('ROOM_JOINED',  (detailsReceived, playersReceived) => {
   loginDetails.isRoomCreator = false
   loginDetails.numberOfClients = playersReceived.lenght
 
-  
+
   navigator.mediaDevices
     .getUserMedia({ video: false, audio: true })
     .then((stream) => {
@@ -150,7 +149,7 @@ function joinRoom(user) {
       loginDetails.name = user;
       loginDetails.roomId = 1;
 
-      console.log('Enviou JOIN com socket id: ', socket.id) 
+      console.log('Enviou JOIN com socket id: ', socket.id)
       socket.emit('JOIN', loginDetails)
     }
   }
