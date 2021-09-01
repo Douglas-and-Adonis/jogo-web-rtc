@@ -60,6 +60,7 @@ io.sockets.on('connection', function(socket) {
 
     //TODO: Review this implementation
     socket.on('ICE_CANDIDATE', (event) => {
+      console.log(event)
       socket.broadcast.to(event.roomId).emit('ICE_CANDIDATE', event)
     })
 
