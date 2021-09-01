@@ -175,7 +175,7 @@ window.onunload = window.onbeforeunload = () => {
   socket.close();
 };
 
-setInterval(sendSome, 200);
+//setInterval(sendSome, 200);
 function sendSome() {
   socket.emit("INFO", info)
 }
