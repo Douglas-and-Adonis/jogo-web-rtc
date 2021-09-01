@@ -90,10 +90,10 @@ socket.on('ROOM_JOINED',  (detailsReceived, playersReceived) => {
 
       midia.getTracks().forEach((track) => localConnection.addTrack(track, midia));
 
-      localConnection.onicecandidate = sendIceCandidate
-      /*localConnection.onicecandidate = ({ candidate }) => {
+      //localConnection.onicecandidate = sendIceCandidate
+      localConnection.onicecandidate = ({ candidate }) => {
           candidate && socket.emit("ICE_CANDIDATE", playersReceived[0], candidate)
-      };*/
+      };
 
       localConnection.ontrack = ({ streams: [midia] }) => {
         audio.srcObject = midia;
@@ -121,14 +121,14 @@ socket.on("OFFER", (id, description) => {
       audio.srcObject = midia;
     };
 
-  remoteConnection.onicecandidate = sendIceCandidate
+  //remoteConnection.onicecandidate = sendIceCandidate
 
-  /*remoteConnection.onicecandidate = ({ candidate })=> {
+  remoteConnection.onicecandidate = ({ candidate })=> {
     if (candidate) {
       console.log("SENDING ICE_CANDIDATE")
       socket.emit("ICE_CANDIDATE", id, candidate);
     }
-  };*/
+  };
 
   remoteConnection
     .setRemoteDescription(description)
@@ -148,12 +148,12 @@ socket.on("ANSWER", (id, description) => {
 });
 
 socket.on("ICE_CANDIDATE", (event) => {
-  console.log(`RECEIVED ICE_CANDIDATE ${candidate}`)
+  console.log(`RECEIVED ICE_CANDIDATE ${event}`)
   const connection = localConnection || remoteConnection;
   console.log(`conection -> ${connection}`)
 
   var candidate = new RTCIceCandidate({
-    sdpMLineIndex: event.label,
+    sdpMLineIndex: event.sdpMLineIndex,
     candidate: event.candidate,
   })
 
