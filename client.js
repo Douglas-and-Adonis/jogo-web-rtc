@@ -27,7 +27,7 @@ var info = 0
 const peerConnections = {};
 
 const iceServers = {
-  iceServers: [
+  ice_servers: [
     { urls: "stun:smu20211.sj.ifsc.edu.br" },
     {
       urls: "turn:smu20211.sj.ifsc.edu.br",
@@ -87,10 +87,8 @@ socket.on('ROOM_JOINED',  (detailsReceived, playersReceived) => {
     .then((stream) => {
       midia = stream;
       localConnection = new RTCPeerConnection(iceServers);
-      // const peerConnection = new RTCPeerConnection(iceServers);
-      // peerConnections[playersReceived[0]] = peerConnection;
 
-      midia.getTracks().forEach(track => localConnection.addTrack(track, midia));
+      midia.getTracks().forEach((track) => localConnection.addTrack(track, midia));
       localConnection.onicecandidate = ({ candidate }) => {
           candidate && socket.emit("ICE_CANDIDATE", playersReceived[0], candidate)
       };
@@ -148,6 +146,7 @@ socket.on("ANSWER", (id, description) => {
 socket.on("ICE_CANDIDATE", (id, candidate) => {
   console.log("RECEIVED ICE_CANDIDATE")
   const connection = localConnection || remoteConnection;
+  console.log(`conection -> ${connection}`)
   connection.addIceCandidate(new RTCIceCandidate(candidate));
   //peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
   //console.log(peerConnections[id]);
