@@ -147,7 +147,7 @@ socket.on("ICE_CANDIDATE", (id, candidate) => {
   console.log("RECEIVED ICE_CANDIDATE")
   const connection = localConnection || remoteConnection;
   console.log(`conection -> ${connection}`)
-  connection.addIceCandidate(new RTCIceCandidate(candidate));
+  connection.addIceCandidate(new RTCIceCandidate(candidate, "teste" , 12345 ));
   //peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
   //console.log(peerConnections[id]);
 });
