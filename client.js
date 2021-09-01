@@ -147,7 +147,7 @@ socket.on("ANSWER", (id, description) => {
   console.log(peerConnections[id]);
 });
 
-socket.on("ICE_CANDIDATE", (id, event) => {
+socket.on("ICE_CANDIDATE", (event) => {
   console.log(`RECEIVED ICE_CANDIDATE ${candidate}`)
   const connection = localConnection || remoteConnection;
   console.log(`conection -> ${connection}`)
