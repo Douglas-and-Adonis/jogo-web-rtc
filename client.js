@@ -27,7 +27,7 @@ var info = 0
 const peerConnections = {};
 
 const iceServers = {
-  ice_servers: [
+  iceServers: [
     { urls: "stun:smu20211.sj.ifsc.edu.br" },
     {
       urls: "turn:smu20211.sj.ifsc.edu.br",
